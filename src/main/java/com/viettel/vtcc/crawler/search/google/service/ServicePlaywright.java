@@ -24,7 +24,7 @@ public class ServicePlaywright {
 
     public static void main(String[] args) {
         ServicePlaywright servicePlaywright = new ServicePlaywright();
-        String url = "https://www.google.com/search?q=hà nội";
+        String url = "https://www.google.com/search?q=seagames 31";
         String text = servicePlaywright.executeRequest(url);
         log.info(text);
     }
@@ -44,8 +44,34 @@ public class ServicePlaywright {
         StringBuilder builder = new StringBuilder();
         Document document = Jsoup.parse(html);
         document.select("h3.Uo8X3b.OhScic.zsYMMe").remove();
+        // get test weather
+        Elements elements_weather = document.select("div#wob_wc.nawv0d");
+        if (!elements_weather.isEmpty()) {
+            // question about the weather
+            String weather = elements_weather.select("span#wob_tm.wob_t.q8U8x").text();
+            String celsius = elements_weather.select("div.vk_bk.wob-unit").select("span.wob_t").first().text();
+            builder.append(weather).append(" ").append(celsius).append("\n");
+            Elements addition_info_elements = elements_weather.select("div.wtsRwe");
+            Jsoup.parse(addition_info_elements.html()).select("div").forEach(addition_info_element -> {
+                String info = addition_info_element.text();
+                builder.append(info).append("\n");
+            });
+            return builder.toString();
+        }
+        // get test check current money price
+        Elements elements_currency = document.select("div#knowledge-currency__updatable-data-column.nRbRnb");
+        if (!elements_currency.isEmpty()) {
+            // question about the weather
+            String condition = elements_currency.select("div.vk_sh.c8Zgcf").text();
+            String price = elements_currency.select("div.dDoNo.ikb4Bb.gsrt").text();
+            builder.append(condition).append(" ").append(price);
+            return builder.toString();
+        }
+
         Elements elements = document.select("div.osrp-blk").select("div.SPZz6b");
+
         if (!elements.isEmpty()) {
+            // person
             // get title + subtitle
             elements = document.select("div.osrp-blk");
             String title = elements.select("div.SPZz6b").attr("data-attrid", "title").text();
@@ -62,6 +88,7 @@ public class ServicePlaywright {
                 }
             });
         } else {
+            // event
             String title = document.select("div.ZxoDOe.yGdMVd").attr("data-attrid", "title").text();
             builder.append(title).append("\n");
             // get description
