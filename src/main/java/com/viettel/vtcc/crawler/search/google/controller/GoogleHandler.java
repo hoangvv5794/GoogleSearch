@@ -27,8 +27,13 @@ public class GoogleHandler {
             String query = jsonObject.get("system_message").getAsString();
             log.info("process query with playwright {}", query);
             String url = "https://www.google.com/search?q=" + query;
-            String data = servicePlaywright.executeRequest(url);
-            return ResponseModel.builder().status_code(0).status_message("message success").data(data).build();
+            String data = servicePlaywright.executeRequest(url).trim();
+            if (!data.isEmpty()){
+                return ResponseModel.builder().status_code(0).status_message("have answer").data(data).build();
+            }else {
+                return ResponseModel.builder().status_code(0).status_message("not answer").data(data).build();
+
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
