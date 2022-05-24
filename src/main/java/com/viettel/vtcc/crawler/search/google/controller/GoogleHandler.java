@@ -27,17 +27,11 @@ public class GoogleHandler {
             String query = jsonObject.get("system_message").getAsString();
             log.info("process query with playwright {}", query);
             String url = "https://www.google.com/search?q=" + query;
-            String data = servicePlaywright.executeRequest(url).trim();
-            if (!data.isEmpty()){
-                return ResponseModel.builder().status_code(0).status_message("have answer").data(data).build();
-            }else {
-                return ResponseModel.builder().status_code(0).status_message("not answer").data(data).build();
-
-            }
+            return servicePlaywright.executeRequest(url);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return ResponseModel.builder().status_code(1).status_message("message error").build();
+        return ResponseModel.getFailedMessage();
     }
 
     @PostMapping(path = "search/knowledge", consumes = "application/json")
@@ -48,11 +42,11 @@ public class GoogleHandler {
             log.info("process query with google knowledge {}", query);
             String data = serviceKnowledge.requestSearch(query);
             if (data != null) {
-                return ResponseModel.builder().status_code(0).status_message("message success").data(data).build();
+                return ResponseModel.getSuccessMessage(data);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return ResponseModel.builder().status_code(1).status_message("message error").build();
+        return ResponseModel.getFailedMessage();
     }
 }
