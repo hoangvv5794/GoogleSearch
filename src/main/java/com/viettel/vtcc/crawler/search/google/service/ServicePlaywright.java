@@ -1,17 +1,16 @@
 package com.viettel.vtcc.crawler.search.google.service;
 
 import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.viettel.vtcc.crawler.search.google.model.ResponseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -20,29 +19,27 @@ public class ServicePlaywright {
 
     private static Playwright playwright;
     private static Browser browser;
-    private static BrowserContext context;
+
     public ServicePlaywright() {
         playwright = Playwright.create();
-        browser = playwright.chromium().launch();
-        context = browser.newContext(new Browser.NewContextOptions()
-                .setGeolocation(10.762622, 106.660172)
-                .setPermissions(Arrays.asList("geolocation")));
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+//                .setProxy(new Proxy("http://171.246.248.216:50826"))
+        );
     }
 
-//    public static void main(String[] args) {
-//        ServicePlaywright servicePlaywright = new ServicePlaywright();
-//        String url = "https://www.google.com/search?q=thoi tiet ho chi minh";
-//        String text = servicePlaywright.executeRequest(url);
-//        log.info(text);
-//    }
 
     public ResponseModel executeRequest(String url) {
         log.info("process request {}", url);
-        Page page = context.newPage();
+        Page page = browser.newPage();
         page.navigate(url);
         String raw_html = page.content();
         ResponseModel responseModel = parseRequest(raw_html);
-        responseModel.setData(responseModel.getData().replace(BLOCK_TEXT, ""));
+        String data = responseModel.getData();
+        if (data.trim().isEmpty()) {
+            return ResponseModel.getNotAnswerMessage();
+        } else {
+            responseModel.setData(responseModel.getData().replace(BLOCK_TEXT, ""));
+        }
         page.close();
         log.info("process done request {}", url);
         return responseModel;
@@ -53,6 +50,35 @@ public class ServicePlaywright {
         StringBuilder builder = new StringBuilder();
         Document document = Jsoup.parse(html);
         document.select("h3.Uo8X3b.OhScic.zsYMMe").remove();
+        // get price stock
+        Elements elements_stock = document.select("div.Crs1tb");
+        if (!elements_stock.isEmpty()) {
+            Elements elements_table = elements_stock.select("div.webanswers-webanswers_table__webanswers-table").select("tr");
+            Element first_line = elements_table.get(1);
+            Elements attributes = first_line.select("td");
+            String stock_id = attributes.get(0).text();
+            String close_price = attributes.get(1).text();
+            String high_price = attributes.get(2).text();
+            builder.append(stock_id).append("\n").append(close_price).append("\n").append(high_price);
+            responseModel.setStock_id(stock_id);
+            responseModel.setClose_price(close_price);
+            responseModel.setHigh_price(high_price);
+            responseModel.setData(builder.toString());
+            responseModel.setStatus_code(0);
+            responseModel.setStatus_message("have answer");
+            return responseModel;
+        }
+        // get population
+        Elements elements_population = document.select("div.ayqGOc.kno-fb-ctx.KBXm4e");
+        if (!elements_population.isEmpty()) {
+            String population = elements_population.text();
+            builder.append(population);
+            responseModel.setData(builder.toString());
+            responseModel.setPopulation(population);
+            responseModel.setStatus_code(0);
+            responseModel.setStatus_message("have answer");
+            return responseModel;
+        }
         // get calculator
         Elements elements_calculator = document.select("div.TIGsTb");
         if (!elements_calculator.isEmpty() && elements_calculator.hasAttr("jsname")) {
@@ -133,8 +159,10 @@ public class ServicePlaywright {
             responseModel.setStatus_code(0);
             responseModel.setStatus_message("have answer");
             return responseModel;
-        } else {
-            // event
+        }
+        // event
+        Elements elements_event = document.select("div.ZxoDOe.yGdMVd");
+        if (!elements_event.isEmpty()) {
             String title = document.select("div.ZxoDOe.yGdMVd").attr("data-attrid", "title").text();
             builder.append(title).append("\n");
             // get description
@@ -153,5 +181,15 @@ public class ServicePlaywright {
             responseModel.setStatus_message("have answer");
             return responseModel;
         }
+        //first default answer
+        Elements elements_first_answer = document.select("div.wDYxhc");
+        if (!elements_first_answer.isEmpty()) {
+            String answer = elements_first_answer.select("span.hgKElc").text();
+            responseModel.setData(answer);
+            responseModel.setStatus_code(0);
+            responseModel.setStatus_message("have answer");
+            return responseModel;
+        }
+        return ResponseModel.getNotAnswerMessage();
     }
 }

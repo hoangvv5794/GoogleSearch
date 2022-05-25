@@ -20,11 +20,25 @@ public class ResponseModel {
     // math fields
     private String math_expression;
     private String math_result;
+    // stock price
+    private String stock_id;
+    private String close_price;
+    private String high_price;
+    // population
+    private String population;
 
     public static ResponseModel getFailedMessage() {
         ResponseModel responseModel = new ResponseModel();
         responseModel.setStatus_message("message error");
         responseModel.setStatus_code(1);
+        return responseModel;
+    }
+
+    public static ResponseModel getNotAnswerMessage() {
+        ResponseModel responseModel = new ResponseModel();
+        responseModel.setStatus_message("not answer");
+        responseModel.setStatus_code(0);
+        responseModel.setData("");
         return responseModel;
     }
 
