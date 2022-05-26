@@ -2,14 +2,19 @@
 - Config api.google.key vào file application.properties trong trường hợp muốn tìm kiếm bằng Google Knowledge API
 - Request search by google playwright: 
   - Method: POST
-  - URL: http://localhost:8080/api/google
+  - URL: http://localhost:8080/search/google
   - Body: {"system_message":"nguyễn phú trọng"}
   - Response: {"status_code": 0,"status_message": "message success","data": "Nguyễn Phú Trọng Tổng Bí thư thực quyền Ban Chấp hành Trung ương Đảng Cộng sản Việt Nam\nNguyễn Phú Trọng là một chính khách người Việt Nam. Ông hiện đang đảm nhiệm chức vụ Tổng Bí thư Ban Chấp hành Trung ương Đảng Cộng sản Việt Nam; Bí thư Quân ủy Trung ương. Wikipedia\nNgày/nơi sinh:14 tháng 4, 1944 (78 tuổi), Đông Hội\nQuốc tịch:Việt Nam\nVợ/chồng:Ngô Thị Mân\nHọc vấn:Trường Đại học Khoa học Tự nhiên, ĐHQGHN (1963–1967)\nChức vụ:Tổng Bí thư thực quyền Ban Chấp hành Trung ương Đảng Cộng sản Việt Nam từ 2011\nChức vụ trước đó:President of the Vietnam Red Cross Society (2018–2021), THÊM\n"}
 - Request search by google knowledge:
     - Method: POST
-    - URL: http://localhost:8080/api/knowledge
+    - URL: http://localhost:8080/search/knowledge
     - Body: {"system_message":"tào đức thắng"}
     - Response: {"status_code": 0,"status_message": "message success","data": "Tào Đức Thắng TGĐ Tập đoàn viễn thông quân đội Viettel"} 
+- Request search stock price
+  - Method: POST
+  - URL: http://localhost:8080/search/stock_price
+  - Body: {"system_message":"mbb"}
+  - Response: {"code":"MBB","date":"2022-05-26","time":"10:47:31","floor":"HOSE","type":"STOCK","basicPrice":28.05,"ceilingPrice":30.0,"floorPrice":26.1,"open":28.3,"high":28.3,"low":27.8,"close":27.85,"average":28.01825113,"adOpen":28.3,"adHigh":28.3,"adLow":27.8,"adClose":27.85,"adAverage":28.01825113,"nmVolume":4328500.0,"nmValue":1.21277E11,"ptVolume":28003.2,"ptValue":8283.96,"change":-0.2,"adChange":-0.2,"pctChange":-0.713,"status_code":0,"status_message":"have answer"}
 - Explain field response
   - status_code: 0: message success / 1: message error
   - status message: have answer / not answer / message error
