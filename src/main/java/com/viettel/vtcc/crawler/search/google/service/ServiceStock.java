@@ -18,6 +18,8 @@ public class ServiceStock {
 
     private final OkHttpClient client = new OkHttpClient();
     private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat formatter_response = new SimpleDateFormat("dd/MM/yyyy");
+
     private final String URL_REQUEST = "https://finfo-api.vndirect.com.vn/v4/stock_prices/?sort=date&size=1&q=code:__STOCK_CODE__~date:gte:__TIME__~date:lte:__TIME__&page=1";
 
     public String requestSearch(String stock_code) {
@@ -37,6 +39,7 @@ public class ServiceStock {
                 JsonArray itemListElement = jsonObject.getAsJsonArray("data");
                 if (itemListElement.size() > 0) {
                     JsonObject itemElement = itemListElement.get(0).getAsJsonObject();
+                    itemElement.addProperty("date", formatter_response.format(new Date()));
                     itemElement.addProperty("status_code", 0);
                     itemElement.addProperty("status_message", "have answer");
                     return itemElement.toString();
