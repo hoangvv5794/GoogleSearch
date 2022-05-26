@@ -13,7 +13,7 @@
 - Request search stock price
   - Method: POST
   - URL: http://localhost:8080/search/stock_price
-  - Body: {"system_message":"mbb"}
+  - Body: {"stock_code":"mbb"}
   - Response: {"code":"MBB","date":"2022-05-26","time":"10:47:31","floor":"HOSE","type":"STOCK","basicPrice":28.05,"ceilingPrice":30.0,"floorPrice":26.1,"open":28.3,"high":28.3,"low":27.8,"close":27.85,"average":28.01825113,"adOpen":28.3,"adHigh":28.3,"adLow":27.8,"adClose":27.85,"adAverage":28.01825113,"nmVolume":4328500.0,"nmValue":1.21277E11,"ptVolume":28003.2,"ptValue":8283.96,"change":-0.2,"adChange":-0.2,"pctChange":-0.713,"status_code":0,"status_message":"have answer"}
 - Explain field response
   - status_code: 0: message success / 1: message error
