@@ -25,7 +25,15 @@ public class StockHandler {
     private String queryStock(@RequestBody String json_payload) throws JsonProcessingException {
         try {
             JsonObject jsonObject = JsonParser.parseString(json_payload).getAsJsonObject();
-            String query = jsonObject.get("stock_code").getAsString();
+            String query = null;
+            if (jsonObject.has("system_message") && !jsonObject.get("system_message").isJsonNull()) {
+                query = jsonObject.get("system_message").getAsString();
+            }            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
+                String fixxed_message = jsonObject.get("fixxed_message").getAsString();
+                if (fixxed_message != null && !fixxed_message.isEmpty()) {
+                    query = fixxed_message;
+                }
+            }
             log.info("process query stock {}", query);
             String data = serviceStock.requestSearch(query);
             if (data != null) {

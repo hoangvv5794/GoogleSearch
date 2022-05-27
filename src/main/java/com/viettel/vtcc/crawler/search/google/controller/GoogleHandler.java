@@ -24,10 +24,22 @@ public class GoogleHandler {
     private ResponseModel executeSearchGoogle(@RequestBody String json_payload) {
         try {
             JsonObject jsonObject = JsonParser.parseString(json_payload).getAsJsonObject();
-            String query = jsonObject.get("system_message").getAsString();
-            log.info("process query with playwright {}", query);
-            String url = "https://www.google.com/search?q=" + query;
-            return servicePlaywright.executeRequest(url);
+            String query = null;
+            if (jsonObject.has("system_message") && !jsonObject.get("system_message").isJsonNull()) {
+                query = jsonObject.get("system_message").getAsString();
+            }
+            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
+                String fixxed_message = jsonObject.get("fixxed_message").getAsString();
+                if (fixxed_message != null && !fixxed_message.isEmpty()) {
+                    query = fixxed_message;
+                }
+            }
+            if (query != null && !query.isEmpty()) {
+                log.info("process query with playwright {}", query);
+                String url = "https://www.google.com/search?q=" + query;
+                return servicePlaywright.executeRequest(url);
+            }
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -38,7 +50,15 @@ public class GoogleHandler {
     private ResponseModel executeSearchAPI(@RequestBody String json_payload) {
         try {
             JsonObject jsonObject = JsonParser.parseString(json_payload).getAsJsonObject();
-            String query = jsonObject.get("system_message").getAsString();
+            String query = null;
+            if (jsonObject.has("system_message") && !jsonObject.get("system_message").isJsonNull()) {
+                query = jsonObject.get("system_message").getAsString();
+            }            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
+                String fixxed_message = jsonObject.get("fixxed_message").getAsString();
+                if (fixxed_message != null && !fixxed_message.isEmpty()) {
+                    query = fixxed_message;
+                }
+            }
             log.info("process query with google knowledge {}", query);
             String data = serviceKnowledge.requestSearch(query);
             if (data != null) {
