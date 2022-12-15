@@ -26,9 +26,10 @@ public class StockHandler {
         try {
             JsonObject jsonObject = JsonParser.parseString(json_payload).getAsJsonObject();
             String query = null;
-            if (jsonObject.has("system_message") && !jsonObject.get("system_message").isJsonNull()) {
-                query = jsonObject.get("system_message").getAsString();
-            }            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
+            if (jsonObject.has("stock_code") && !jsonObject.get("stock_code").isJsonNull()) {
+                query = jsonObject.get("stock_code").getAsString().replace("_", " ");
+            }
+            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
                 String fixxed_message = jsonObject.get("fixxed_message").getAsString();
                 if (fixxed_message != null && !fixxed_message.isEmpty()) {
                     query = fixxed_message;

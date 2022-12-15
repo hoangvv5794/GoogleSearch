@@ -8,7 +8,6 @@ import com.viettel.vtcc.crawler.search.google.model.ResponseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
@@ -20,29 +19,34 @@ public class ServicePlaywright {
     private static Playwright playwright;
     private static Browser browser;
 
+
     public ServicePlaywright() {
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-//                .setProxy(new Proxy("http://171.246.248.216:50826"))
         );
     }
 
 
     public ResponseModel executeRequest(String url) {
         log.info("process request {}", url);
-        Page page = browser.newPage();
-        page.navigate(url);
-        String raw_html = page.content();
-        ResponseModel responseModel = parseRequest(raw_html);
-        String data = responseModel.getData();
-        if (data.trim().isEmpty()) {
-            return ResponseModel.getNotAnswerMessage();
-        } else {
-            responseModel.setData(responseModel.getData().replace(BLOCK_TEXT, ""));
+        Page page;
+        try {
+            page = browser.newPage();
+            page.navigate(url);
+            String raw_html = page.content();
+            ResponseModel responseModel = parseRequest(raw_html);
+            String data = responseModel.getData();
+            if (data.trim().isEmpty()) {
+                return ResponseModel.getNotAnswerMessage();
+            } else {
+                responseModel.setData(responseModel.getData().replace(BLOCK_TEXT, ""));
+            }
+            log.info("process done request {}", url);
+            return responseModel;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
-        page.close();
-        log.info("process done request {}", url);
-        return responseModel;
+        return ResponseModel.getNotAnswerMessage();
     }
 
     private ResponseModel parseRequest(String html) {
@@ -50,24 +54,25 @@ public class ServicePlaywright {
         StringBuilder builder = new StringBuilder();
         Document document = Jsoup.parse(html);
         document.select("h3.Uo8X3b.OhScic.zsYMMe").remove();
+        document.select("a.w13wLe").remove();
         // get price stock
-        Elements elements_stock = document.select("div.Crs1tb");
-        if (!elements_stock.isEmpty()) {
-            Elements elements_table = elements_stock.select("div.webanswers-webanswers_table__webanswers-table").select("tr");
-            Element first_line = elements_table.get(1);
-            Elements attributes = first_line.select("td");
-            String stock_id = attributes.get(0).text();
-            String close_price = attributes.get(1).text();
-            String high_price = attributes.get(2).text();
-            builder.append(stock_id).append("\n").append(close_price).append("\n").append(high_price);
-            responseModel.setStock_id(stock_id);
-            responseModel.setClose_price(close_price);
-            responseModel.setHigh_price(high_price);
-            responseModel.setData(builder.toString());
-            responseModel.setStatus_code(0);
-            responseModel.setStatus_message("have answer");
-            return responseModel;
-        }
+//        Elements elements_stock = document.select("div.Crs1tb");
+//        if (!elements_stock.isEmpty()) {
+//            Elements elements_table = elements_stock.select("div.webanswers-webanswers_table__webanswers-table").select("tr");
+//            Element first_line = elements_table.get(1);
+//            Elements attributes = first_line.select("td");
+//            String stock_id = attributes.get(0).text();
+//            String close_price = attributes.get(1).text();
+//            String high_price = attributes.get(2).text();
+//            builder.append(stock_id).append("\n").append(close_price).append("\n").append(high_price);
+//            responseModel.setStock_id(stock_id);
+//            responseModel.setClose_price(close_price);
+//            responseModel.setHigh_price(high_price);
+//            responseModel.setData(builder.toString());
+//            responseModel.setStatus_code(0);
+//            responseModel.setStatus_message("have answer");
+//            return responseModel;
+//        }
         // get population
         Elements elements_population = document.select("div.ayqGOc.kno-fb-ctx.KBXm4e");
         if (!elements_population.isEmpty()) {
@@ -184,11 +189,33 @@ public class ServicePlaywright {
         //first default answer
         Elements elements_first_answer = document.select("div.wDYxhc");
         if (!elements_first_answer.isEmpty()) {
-            String answer = elements_first_answer.select("span.hgKElc").text();
-            responseModel.setData(answer);
-            responseModel.setStatus_code(0);
-            responseModel.setStatus_message("have answer");
-            return responseModel;
+            // parse first result
+            Elements first_result = elements_first_answer.select("span.hgKElc");
+            if (first_result != null && !first_result.isEmpty()) {
+                String answer = elements_first_answer.select("span.hgKElc").text();
+                responseModel.setData(answer);
+                responseModel.setStatus_code(0);
+                responseModel.setStatus_message("have answer");
+                return responseModel;
+            }
+            // parse today
+            Elements today_elements = elements_first_answer.select("div.vk_gy.vk_sh.card-section.sL6Rbf");
+            if (today_elements != null && !today_elements.isEmpty()) {
+                String answer = today_elements.text();
+                responseModel.setData(answer);
+                responseModel.setStatus_code(0);
+                responseModel.setStatus_message("have answer");
+                return responseModel;
+            }
+            // parse case relate first
+            Elements related_first = elements_first_answer.select("div.Crs1tb");
+            if (related_first != null && !related_first.isEmpty()) {
+                String answer = related_first.text();
+                responseModel.setData(answer);
+                responseModel.setStatus_code(0);
+                responseModel.setStatus_message("have answer");
+                return responseModel;
+            }
         }
         return ResponseModel.getNotAnswerMessage();
     }

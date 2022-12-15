@@ -1,14 +1,31 @@
 package com.viettel.vtcc.crawler.search.google.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.viettel.vtcc.crawler.search.google.service.ServiceResponseAnswer;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Component
 public class ResponseModel {
+
+    private static ServiceResponseAnswer staticServiceResponseAnswer;
+
+    @Autowired
+    public ResponseModel(ServiceResponseAnswer foo) {
+        ResponseModel.staticServiceResponseAnswer = foo;
+    }
+
+    public ResponseModel() {
+
+    }
+
     private int status_code;
     private String status_message;
     private String data;
+    private String not_answer_message;
     // weather fields
     private String weather_temp;
     private String weather_rain;
@@ -37,6 +54,7 @@ public class ResponseModel {
     public static ResponseModel getNotAnswerMessage() {
         ResponseModel responseModel = new ResponseModel();
         responseModel.setStatus_message("not answer");
+        responseModel.setNot_answer_message(staticServiceResponseAnswer.getRandomAnswer());
         responseModel.setStatus_code(0);
         responseModel.setData("");
         return responseModel;

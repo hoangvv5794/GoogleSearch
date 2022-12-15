@@ -26,7 +26,7 @@ public class GoogleHandler {
             JsonObject jsonObject = JsonParser.parseString(json_payload).getAsJsonObject();
             String query = null;
             if (jsonObject.has("system_message") && !jsonObject.get("system_message").isJsonNull()) {
-                query = jsonObject.get("system_message").getAsString();
+                query = jsonObject.get("system_message").getAsString().replace("_", " ");
             }
             if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
                 String fixxed_message = jsonObject.get("fixxed_message").getAsString();
@@ -36,7 +36,7 @@ public class GoogleHandler {
             }
             if (query != null && !query.isEmpty()) {
                 log.info("process query with playwright {}", query);
-                String url = "https://www.google.com/search?q=" + query;
+                String url = "https://www.google.com.vn/search?q=" + query+"&near=Cau Giay";
                 return servicePlaywright.executeRequest(url);
             }
 
@@ -52,8 +52,9 @@ public class GoogleHandler {
             JsonObject jsonObject = JsonParser.parseString(json_payload).getAsJsonObject();
             String query = null;
             if (jsonObject.has("system_message") && !jsonObject.get("system_message").isJsonNull()) {
-                query = jsonObject.get("system_message").getAsString();
-            }            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
+                query = jsonObject.get("system_message").getAsString().replace("_", " ");
+            }
+            if (jsonObject.has("fixxed_message") && !jsonObject.get("fixxed_message").isJsonNull()) {
                 String fixxed_message = jsonObject.get("fixxed_message").getAsString();
                 if (fixxed_message != null && !fixxed_message.isEmpty()) {
                     query = fixxed_message;
